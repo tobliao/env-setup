@@ -1,0 +1,143 @@
+silent! call plug#begin('~/.vim/plugged')
+Plug 'scrooloose/nerdtree'
+Plug 'vhda/verilog_systemverilog.vim', {'branch': 'master'}
+Plug 'tpope/vim-fugitive'
+Plug 'rakr/vim-one'
+Plug 'shmup/vim-sql-syntax'
+Plug 'mg979/vim-visual-multi', {'branch': 'master'}
+Plug 'ctrlpvim/ctrlp.vim'
+Plug 'yegappan/mru'
+call plug#end()
+
+
+" ================
+" Basic Setting
+" ================
+
+set t_Co=256
+colorscheme one
+
+set backspace=indent,eol,start      " 讓我在進入insert mode時可以刪除文字(原本會有無法刪除的問題)
+set mouse=a                         " 讓滑鼠可以在vim裡面使用
+set ttymouse=xterm2                 " 相依於上面那點，我想要在split時可以用滑鼠任意調整視窗大小
+set encoding=utf8                   " UTF8
+syntax enable                       " 語法上色
+
+set number                          " 顯示行號
+:augroup numbertoggle
+:  autocmd!
+:  autocmd BufEnter,FocusGained,InsertLeave,WinEnter * if &nu && mode() != "i" | set rnu   | endif
+:  autocmd BufLeave,FocusLost,InsertEnter,WinLeave   * if &nu                  | set nornu | endif
+:augroup END
+
+set softtabstop=4                   " 使得按退格鍵時可以一次刪掉 4 個空格
+set expandtab                       " 使用空白取代Tab
+set tabstop=4                       " 設定tab長度爲4
+set shiftwidth=4                    " 設定縮排長度爲4的方法
+set ai                              " 設定自動縮排，但貼去不同的地方時可能會亂掉，這時可以手動切換至貼上模式 :set paste 再進行貼上
+set background=dark                 " 啟用暗色背景
+set ic                              " 搜尋不分大小寫
+set scrolloff=3                     " 捲動時保留底下3行
+set cursorline                      " 突出顯示當前行(水平)
+" set cursorcolumn                  " 高亮當前列(垂直)
+set ruler                           " 設定尺規，設定完畢右下方會出現一個這樣的東西，顯示檔名、總行數、總字元數、目前第幾行、在第幾個字元、在文章的什麼位置，但你有設定Powerline的時候就用不到了
+set showmatch                       " 顯示括號配對情況
+set nocompatible                    " 讓vim在非相容模式下工作(不相容vi)
+set incsearch                       " 搜索時在未完全輸入完畢要檢索的文本時就開始檢索，可以使用 ctrl+n 來達成自動補完的功能
+set history=1000                    " 設定命令儲存行數
+setglobal fileencoding=utf-8        " 用來設定特定檔案的編碼，使用    setglobal 可以設定它的預設值，fileencoding若設定為空字串則表示跟 encoding 所指定的編碼方式相同
+
+
+" ================
+" Advanced Setting
+" ================
+
+hi LineNr cterm=bold ctermfg=DarkGrey ctermbg=NONE
+hi CursorLineNr cterm=bold ctermfg=Green ctermbg=NONE
+hi CursorLine ctermfg=NONE ctermbg=237 cterm=NONE
+
+
+" ================
+" Alias Setting
+" ================
+
+" Pressing the letter o will open a new line below the current one.
+" Exit insert mode after creating a new line above or below the current line.
+nnoremap o o<esc>
+nnoremap O O<esc>
+" Center the cursor vertically when moving to the next word during a search.
+nnoremap n nzz
+nnoremap N Nzz
+" Show the pull-path
+nnoremap fp 1<C-g>
+" Fold and unfold
+nnoremap ff zM
+nnoremap uf zR
+" set the leader key
+:let mapleader = ","
+" map the control w to space
+nnoremap <Space> <C-w>
+" span splitted window
+nnoremap <Space>- <C-w>_
+nnoremap <Space>\ <C-w>\|
+nnoremap <Space>a <C-w>_<C-w>\|<CR>
+
+map <leader>tn :tabnew<cr>
+map <leader>to :tabonly<cr>
+map <leader>tc :tabclose<cr>
+map <leader>tm :tabmove
+
+" Opens a new tab with the current buffer's path
+" Super useful when editing files in the same directory
+map <leader>te :tabedit <C-r>=escape(expand("%:p:h"), " ")<cr>/
+
+
+
+
+" ================
+" Plug-In Setting
+" ================
+
+" === Nerd Tree Config === 
+let NERDTreeWinPos='right'
+let NERDTreeWinSize=30
+let NERDTreeDirArrows = 1
+let NERDTreeDirArrowExpandable = '▸'
+let NERDTreeDirArrowCollapsible = '▾'
+map <leader>nn :NERDTreeToggle<cr>
+map <leader>nb :NERDTreeFromBookmark
+map <leader>nf :NERDTreeFind<cr>
+" Have nerdtree ignore certain files and directories.
+let NERDTreeIgnore=['\.git$', '\.jpg$', '\.mp4$', '\.ogg$', '\.iso$', '\.pdf$', '\.pyc$', '\.odt$', '\.png$', '\.gif$', '\.db$']
+" for the SQL HL setting
+if has("autocmd")
+        autocmd BufRead *.sql set filetype=mysql
+        autocmd BufRead *.test set filetype=mysql
+endif
+" === Setting the ctrlp.vim === 
+" Quickly find and open a file in the CWD
+let g:ctrlp_map = '<C-s>'
+
+" Quickly find and open a recently opened file
+map <leader>f :MRU<CR>
+
+" Quickly find and open a buffer
+map <leader>b :CtrlPBuffer<cr>
+
+
+" ================
+" Status Setting
+" ================
+hi statusline guibg=Grey3 ctermfg=232 guifg=Grey66 ctermbg=248
+set statusline=
+set statusline+=%F
+set statusline+=%r      "read only flag
+set statusline+=%m      "modified flag
+set statusline+=%#warningmsg#
+set statusline+=%{fugitive#statusline()}
+set statusline+=%*
+set statusline+=%=      "left/right separator
+set statusline+=%l/%L   "cursor line/total lines
+set statusline+=\ %P    "percent through file
+set laststatus=2        " Always show status line
+
